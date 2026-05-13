@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.0.1] - 2026-05-13
+
+### Added
+
+- **Multilingual UI**: card labels translated into English, Deutsch, Français and Español. Language is auto-detected from `hass.locale.language` and falls back to English. Manual override via new `language: en | de | fr | es | auto` option (default `auto`) — also available in the **General** tab of the editor.
+- New language selector covers: section default titles, donut center label, legend entries (Grid / Solar / Battery), battery status (Charging / Discharging / Idle), Max Charge / Max Discharge rate labels, Reserve / Cutoff gauge markers, Capacity row, stats panel (Temp / Cycles / Health), today/today-colon, loading and error messages.
+
+### Notes
+
+- Editor labels and tab names remain in English by design — they're aimed at the configurer rather than the dashboard viewer.
+
 ## [v1.0.0] - 2026-05-12
 
 Initial release. Forked from Universal Battery Card v2.4.0 (Laurence Syree, MIT),

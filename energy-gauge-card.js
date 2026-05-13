@@ -14,10 +14,11 @@ const css = LitElement.prototype.css;
 
 const CARD_NAME = 'Energy Gauge Card';
 const CARD_DESCRIPTION = 'Battery, consumption, and solar gauges for Home Assistant';
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 
 const DEFAULT_CONFIG = {
   name: 'Battery',
+  language: 'auto',   // 'auto' = follow HA UI language; otherwise 'en', 'de', 'fr', 'es'
   soc_threshold_very_high: 80,
   soc_threshold_high: 60,
   soc_threshold_medium: 40,
@@ -147,6 +148,147 @@ const MASONRY_UNIT_PX = 50;            // masonry view: 1 getCardSize unit
 const SECTION_COL_PX = 30;             // sections view grid cell width
 const SECTION_ROW_PX = 56;             // sections view grid cell height
 const SECTION_GAP_PX = 8;              // gap between section cells
+
+// ============================================================================
+// I18N — Translations
+// ============================================================================
+
+const TRANSLATIONS = {
+  en: {
+    battery: 'Battery',
+    consumption: 'Consumption',
+    consumption_label: 'Consumption',
+    solar: 'Solar',
+    pv_total: 'PV total',
+    grid: 'Grid',
+    solar_short: 'Solar',
+    battery_short: 'Battery',
+    today: 'today',
+    today_colon: 'today:',
+    charging: 'Charge',
+    discharging: 'Discharge',
+    idle: 'Idle',
+    max_charge: 'Max Charge',
+    max_discharge: 'Max Discharge',
+    capacity: 'Capacity',
+    reserve: 'Reserve',
+    cutoff: 'Cutoff',
+    mode: 'Mode',
+    temp: 'Battery Temp',
+    cycles: 'Battery Cycles',
+    health: 'Battery Health',
+    loading: 'Loading...',
+    configure_entities: 'Configure entities to get started',
+    no_sections: 'No sections enabled. Use the editor to enable Battery, Consumption, or Solar.',
+    battery_sensors_unavailable: 'Unable to read battery sensor values',
+    consumption_sensors_unavailable: 'Consumption sensors not configured',
+    solar_sensors_unavailable: 'No solar entities configured',
+  },
+  de: {
+    battery: 'Batterie',
+    consumption: 'Verbrauch',
+    consumption_label: 'Verbrauch',
+    solar: 'Solar',
+    pv_total: 'PV gesamt',
+    grid: 'Netz',
+    solar_short: 'Solar',
+    battery_short: 'Akku',
+    today: 'heute',
+    today_colon: 'heute:',
+    charging: 'Laden',
+    discharging: 'Entladen',
+    idle: 'Bereit',
+    max_charge: 'Max Laden',
+    max_discharge: 'Max Entladen',
+    capacity: 'Kapazität',
+    reserve: 'Reserve',
+    cutoff: 'Cutoff',
+    mode: 'Modus',
+    temp: 'Batterie-Temp.',
+    cycles: 'Ladezyklen',
+    health: 'Batterie-Gesundheit',
+    loading: 'Lädt...',
+    configure_entities: 'Entitäten konfigurieren zum Starten',
+    no_sections: 'Keine Sektionen aktiv. Aktiviere im Editor Batterie, Verbrauch oder Solar.',
+    battery_sensors_unavailable: 'Batterie-Sensoren nicht lesbar',
+    consumption_sensors_unavailable: 'Verbrauchs-Sensoren nicht konfiguriert',
+    solar_sensors_unavailable: 'Keine Solar-Entitäten konfiguriert',
+  },
+  fr: {
+    battery: 'Batterie',
+    consumption: 'Consommation',
+    consumption_label: 'Consommation',
+    solar: 'Solaire',
+    pv_total: 'PV total',
+    grid: 'Réseau',
+    solar_short: 'Solaire',
+    battery_short: 'Batterie',
+    today: 'aujourd\'hui',
+    today_colon: 'aujourd\'hui :',
+    charging: 'Charge',
+    discharging: 'Décharge',
+    idle: 'Inactif',
+    max_charge: 'Charge max',
+    max_discharge: 'Décharge max',
+    capacity: 'Capacité',
+    reserve: 'Réserve',
+    cutoff: 'Limite',
+    mode: 'Mode',
+    temp: 'Temp. batterie',
+    cycles: 'Cycles batterie',
+    health: 'Santé batterie',
+    loading: 'Chargement...',
+    configure_entities: 'Configurer les entités pour démarrer',
+    no_sections: 'Aucune section activée. Utilisez l\'éditeur pour activer Batterie, Consommation ou Solaire.',
+    battery_sensors_unavailable: 'Capteurs de batterie indisponibles',
+    consumption_sensors_unavailable: 'Capteurs de consommation non configurés',
+    solar_sensors_unavailable: 'Aucune entité solaire configurée',
+  },
+  es: {
+    battery: 'Batería',
+    consumption: 'Consumo',
+    consumption_label: 'Consumo',
+    solar: 'Solar',
+    pv_total: 'PV total',
+    grid: 'Red',
+    solar_short: 'Solar',
+    battery_short: 'Batería',
+    today: 'hoy',
+    today_colon: 'hoy:',
+    charging: 'Cargando',
+    discharging: 'Descargando',
+    idle: 'Inactivo',
+    max_charge: 'Carga máx',
+    max_discharge: 'Descarga máx',
+    capacity: 'Capacidad',
+    reserve: 'Reserva',
+    cutoff: 'Límite',
+    mode: 'Modo',
+    temp: 'Temp. batería',
+    cycles: 'Ciclos de batería',
+    health: 'Salud de batería',
+    loading: 'Cargando...',
+    configure_entities: 'Configurar entidades para empezar',
+    no_sections: 'Ninguna sección activada. Usa el editor para activar Batería, Consumo o Solar.',
+    battery_sensors_unavailable: 'Sensores de batería no disponibles',
+    consumption_sensors_unavailable: 'Sensores de consumo no configurados',
+    solar_sensors_unavailable: 'No hay entidades solares configuradas',
+  },
+};
+
+const SUPPORTED_LANGUAGES = ['auto', 'en', 'de', 'fr', 'es'];
+
+function pickLanguage(hass, config) {
+  const configured = ((config && config.language) || 'auto').toLowerCase();
+  if (configured !== 'auto' && TRANSLATIONS[configured]) return configured;
+  const hassLang = ((hass && (hass.locale?.language || hass.language)) || 'en').slice(0, 2).toLowerCase();
+  return TRANSLATIONS[hassLang] ? hassLang : 'en';
+}
+
+function tr(key, hass, config) {
+  const lang = pickLanguage(hass, config);
+  return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) || TRANSLATIONS.en[key] || key;
+}
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -1214,6 +1356,13 @@ const PANEL_SCHEMA = [
 const GENERAL_SCHEMA = [
   { name: 'name', label: 'Card Name', selector: { text: {} } },
   { name: 'gauge_thickness', label: 'Gauge Ring Thickness (%)', selector: { number: { min: 5, max: 15, mode: 'slider' } } },
+  { name: 'language', label: 'Language', selector: { select: { options: [
+    { value: 'auto', label: 'Auto (follow HA)' },
+    { value: 'en', label: 'English' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'fr', label: 'Français' },
+    { value: 'es', label: 'Español' },
+  ] } } },
 ];
 
 const ENTITIES_SCHEMA = [
@@ -1615,6 +1764,11 @@ class EnergyGaugeCard extends LitElement {
       throw new Error(`header_style must be 'full', 'title', or 'none' (got ${JSON.stringify(config.header_style)})`);
     }
 
+    // language enum
+    if (config.language !== undefined && !SUPPORTED_LANGUAGES.includes(config.language)) {
+      throw new Error(`language must be one of ${JSON.stringify(SUPPORTED_LANGUAGES)} (got ${JSON.stringify(config.language)})`);
+    }
+
     // consumption_calc_mode enum
     if (config.consumption_calc_mode !== undefined &&
         !['composed', 'calculated', 'direct'].includes(config.consumption_calc_mode)) {
@@ -1694,6 +1848,11 @@ class EnergyGaugeCard extends LitElement {
     if (!entityId) return;
     e.stopPropagation();
     fireEvent(this, 'hass-more-info', { entityId });
+  }
+
+  /** Translation lookup helper — picks language from config or HA */
+  _t(key) {
+    return tr(key, this.hass, this._config);
   }
 
   // Derive layout-relevant flags from the current config in one place.
@@ -2257,7 +2416,7 @@ class EnergyGaugeCard extends LitElement {
     const sectionCount = (showBattery ? 1 : 0) + (showConsumption ? 1 : 0) + (showSolar ? 1 : 0);
 
     if (sectionCount === 0) {
-      return this._renderError('No sections enabled. Use the editor to enable Battery, Consumption, or Solar.');
+      return this._renderError(this._t('no_sections'));
     }
 
     const cardClass = sectionCount === 1 ? 'single-section' : 'multi-section';
@@ -2292,7 +2451,7 @@ class EnergyGaugeCard extends LitElement {
     }
     const stats = this._calculateStats();
     if (!stats) {
-      return html`<div class="section battery-section"><div class="error-container">Unable to read battery sensor values</div></div>`;
+      return html`<div class="section battery-section"><div class="error-container">${this._t('battery_sensors_unavailable')}</div></div>`;
     }
     return this._renderBatterySection(stats);
   }
@@ -2322,7 +2481,7 @@ class EnergyGaugeCard extends LitElement {
     const dischargeRateFormatted = stats.dischargeRateW !== null ? formatPower(stats.dischargeRateW) : null;
 
     // Power direction
-    const powerDirection = stats.status === 'charging' ? 'Charge' : stats.status === 'discharging' ? 'Discharge' : 'Idle';
+    const powerDirection = stats.status === 'charging' ? this._t('charging') : stats.status === 'discharging' ? this._t('discharging') : this._t('idle');
     const powerIcon = stats.status === 'charging' ? 'mdi:arrow-left' : stats.status === 'discharging' ? 'mdi:arrow-right' : '';
 
     // Status icon for display
@@ -2354,7 +2513,7 @@ class EnergyGaugeCard extends LitElement {
             <div class="header-left">
               ${this._config.show_battery_title !== false ? html`
                 <div class="title-row">
-                  <span class="title">${this._config.battery_section_title || 'Battery'}</span>
+                  <span class="title">${this._config.battery_section_title || this._t('battery')}</span>
                 </div>
               ` : ''}
               ${this._config.header_style === 'full' ? html`
@@ -2373,19 +2532,19 @@ class EnergyGaugeCard extends LitElement {
                 </div>
               ` : ''}
               ${this._config.header_style === 'full' && capacityFormatted && this._config.show_capacity !== false ? html`
-                <div class="capacity-row">Capacity: ${capacityFormatted.value} ${capacityFormatted.unit}</div>
+                <div class="capacity-row">${this._t('capacity')}: ${capacityFormatted.value} ${capacityFormatted.unit}</div>
               ` : ''}
             </div>
             ${this._config.header_style === 'full' && stats.hasStats && this._config.show_stats !== false ? html`
               <div class="stats-panel">
                 ${stats.temp !== null ? html`
-                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.temp_entity)}>Battery Temp: <span>${stats.temp}${stats.tempUnit}</span></div>
+                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.temp_entity)}>${this._t('temp')}: <span>${stats.temp}${stats.tempUnit}</span></div>
                 ` : ''}
                 ${stats.cycles !== null ? html`
-                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.cycles_entity)}>Battery Cycles: <span>${stats.cycles}</span></div>
+                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.cycles_entity)}>${this._t('cycles')}: <span>${stats.cycles}</span></div>
                 ` : ''}
                 ${stats.health !== null ? html`
-                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.health_entity)}>Battery Health: <span>${stats.health}%</span></div>
+                  <div class="stat" @click=${(e) => this._openMoreInfo(e, this._config.health_entity)}>${this._t('health')}: <span>${stats.health}%</span></div>
                 ` : ''}
               </div>
             ` : ''}
@@ -2421,10 +2580,10 @@ class EnergyGaugeCard extends LitElement {
             ${this._config.show_gauge_labels !== false ? html`
               <div class="gauge-labels">
                 ${stats.reservePercent !== null ? html`
-                  <div class="gauge-label reserve">Reserve ${Math.round(stats.reservePercent)}%</div>
+                  <div class="gauge-label reserve">${this._t('reserve')} ${Math.round(stats.reservePercent)}%</div>
                 ` : ''}
                 ${stats.cutoffPercent !== null ? html`
-                  <div class="gauge-label cutoff">Cutoff ${Math.round(stats.cutoffPercent)}%</div>
+                  <div class="gauge-label cutoff">${this._t('cutoff')} ${Math.round(stats.cutoffPercent)}%</div>
                 ` : ''}
               </div>
             ` : ''}
@@ -2456,13 +2615,13 @@ class EnergyGaugeCard extends LitElement {
                 <div class="rate-labels">
                   ${dischargeRateFormatted ? html`
                     <div class="rate-label-item">
-                      Max Discharge
+                      ${this._t('max_discharge')}
                       <span>${dischargeRateFormatted.value} ${dischargeRateFormatted.unit}</span>
                     </div>
                   ` : ''}
                   ${chargeRateFormatted ? html`
                     <div class="rate-label-item">
-                      Max Charge
+                      ${this._t('max_charge')}
                       <span>${chargeRateFormatted.value} ${chargeRateFormatted.unit}</span>
                     </div>
                   ` : ''}
@@ -2493,9 +2652,9 @@ class EnergyGaugeCard extends LitElement {
         <div class="header">
           <div class="header-left">
             <div class="title-row">
-              <span class="title">${this._config.battery_section_title || 'Battery'}</span>
+              <span class="title">${this._config.battery_section_title || this._t('battery')}</span>
             </div>
-            <div class="state-row skeleton">Loading...</div>
+            <div class="state-row skeleton">${this._t('loading')}</div>
           </div>
         </div>
         <div class="gauges-container">
@@ -2525,10 +2684,10 @@ class EnergyGaugeCard extends LitElement {
         <div class="header">
           <div class="header-left">
             <div class="title-row">
-              <span class="title">${this._config.battery_section_title || 'Battery'}</span>
+              <span class="title">${this._config.battery_section_title || this._t('battery')}</span>
             </div>
             <div class="state-row" style="opacity: 0.6">
-              Configure entities to get started
+              ${this._t('configure_entities')}
             </div>
           </div>
         </div>
@@ -2560,10 +2719,12 @@ class EnergyGaugeCard extends LitElement {
     if (!c.available) {
       return html`
         <div class="section consumption-section">
-          <div class="section-title">Consumption</div>
+          ${config.show_consumption_title !== false ? html`
+            <div class="section-title">${config.consumption_section_title || this._t('consumption')}</div>
+          ` : ''}
           <div class="error-container">
             <ha-icon icon="mdi:flash-alert"></ha-icon>
-            <div>Consumption sensors not configured</div>
+            <div>${this._t('consumption_sensors_unavailable')}</div>
           </div>
         </div>`;
     }
@@ -2595,14 +2756,14 @@ class EnergyGaugeCard extends LitElement {
     return html`
       <div class="section consumption-section">
         ${config.show_consumption_title !== false ? html`
-          <div class="section-title">${config.consumption_section_title || 'Consumption'}</div>
+          <div class="section-title">${config.consumption_section_title || this._t('consumption')}</div>
         ` : ''}
         <div class="consumption-gauge-wrapper" @click=${(e) => this._openMoreInfo(e, clickEntity)}>
           <div class="consumption-gauge" style="background: ${background}; --ring-thickness: ${thickness}%">
             <div class="gauge-center">
               <span class="consumption-value">${totalFmt.value} ${totalFmt.unit}</span>
-              <span class="consumption-label">Verbrauch</span>
-              ${showEnergyToday && consToday ? html`<span class="consumption-energy-today">heute: ${consToday}</span>` : ''}
+              <span class="consumption-label">${this._t('consumption_label')}</span>
+              ${showEnergyToday && consToday ? html`<span class="consumption-energy-today">${this._t('today_colon')} ${consToday}</span>` : ''}
             </div>
           </div>
         </div>
@@ -2610,18 +2771,18 @@ class EnergyGaugeCard extends LitElement {
           <div class="consumption-legend">
             <div class="legend-item" @click=${(e) => this._openMoreInfo(e, config.grid_import_entity || config.grid_power_entity)}>
               <span class="legend-swatch" style="background: ${colors.grid}"></span>
-              Netz: <span class="legend-value">${gridFmt.value} ${gridFmt.unit}</span>
-              ${showEnergyToday && gridToday ? html`<span class="legend-today">(${gridToday} heute)</span>` : ''}
+              ${this._t('grid')}: <span class="legend-value">${gridFmt.value} ${gridFmt.unit}</span>
+              ${showEnergyToday && gridToday ? html`<span class="legend-today">(${gridToday} ${this._t('today')})</span>` : ''}
             </div>
             <div class="legend-item" @click=${(e) => this._openMoreInfo(e, config.pv_direct_entity || config.pv_self_consumption_entity || config.pv_total_entity)}>
               <span class="legend-swatch" style="background: ${colors.pv}"></span>
-              Solar: <span class="legend-value">${pvFmt.value} ${pvFmt.unit}</span>
-              ${showEnergyToday && pvToday ? html`<span class="legend-today">(${pvToday} heute)</span>` : ''}
+              ${this._t('solar_short')}: <span class="legend-value">${pvFmt.value} ${pvFmt.unit}</span>
+              ${showEnergyToday && pvToday ? html`<span class="legend-today">(${pvToday} ${this._t('today')})</span>` : ''}
             </div>
             <div class="legend-item" @click=${(e) => this._openMoreInfo(e, config.battery_discharge_entity || config.power_entity)}>
               <span class="legend-swatch" style="background: ${colors.battery}"></span>
-              Akku: <span class="legend-value">${battFmt.value} ${battFmt.unit}</span>
-              ${showEnergyToday && battToday ? html`<span class="legend-today">(${battToday} heute)</span>` : ''}
+              ${this._t('battery_short')}: <span class="legend-value">${battFmt.value} ${battFmt.unit}</span>
+              ${showEnergyToday && battToday ? html`<span class="legend-today">(${battToday} ${this._t('today')})</span>` : ''}
             </div>
           </div>
         ` : ''}
@@ -2639,10 +2800,12 @@ class EnergyGaugeCard extends LitElement {
     if (!s.available && (!config.pv_panels || config.pv_panels.length === 0) && !config.pv_total_entity) {
       return html`
         <div class="section solar-section">
-          <div class="section-title">Solar</div>
+          ${config.show_solar_title !== false ? html`
+            <div class="section-title">${config.solar_section_title || this._t('solar')}</div>
+          ` : ''}
           <div class="error-container">
             <ha-icon icon="mdi:solar-power"></ha-icon>
-            <div>No solar entities configured</div>
+            <div>${this._t('solar_sensors_unavailable')}</div>
           </div>
         </div>`;
     }
@@ -2670,7 +2833,7 @@ class EnergyGaugeCard extends LitElement {
     return html`
       <div class="section solar-section" style="--egc-panel-cols: ${cols}">
         ${config.show_solar_title !== false ? html`
-          <div class="section-title">${config.solar_section_title || 'Solar'}</div>
+          <div class="section-title">${config.solar_section_title || this._t('solar')}</div>
         ` : ''}
         <div class="solar-content">
           ${hasTotal ? html`
@@ -2678,8 +2841,8 @@ class EnergyGaugeCard extends LitElement {
               <div class="solar-total-gauge" style="background: ${totalBg}; --ring-thickness: ${thickness}%">
                 <div class="gauge-center">
                   <span class="solar-total-value" style="color: ${color}">${totalFmt.value} ${totalFmt.unit}</span>
-                  <span class="solar-total-label">PV gesamt${s.totalPeak ? ` · ${Math.round(totalPct)}%` : ''}</span>
-                  ${showEnergyToday && totalToday ? html`<span class="solar-total-energy-today">heute: ${totalToday}</span>` : ''}
+                  <span class="solar-total-label">${this._t('pv_total')}${s.totalPeak ? ` · ${Math.round(totalPct)}%` : ''}</span>
+                  ${showEnergyToday && totalToday ? html`<span class="solar-total-energy-today">${this._t('today_colon')} ${totalToday}</span>` : ''}
                 </div>
               </div>
             </div>

@@ -8,6 +8,7 @@ Forked from [Universal Battery Card](https://github.com/laurence-syree/universal
 
 ## Features
 
+- **Multilingual UI**: English, German, French, Spanish — auto-detected from HA's language, or forced via `language` option
 - **Three independent sections** (`show_battery`, `show_consumption`, `show_solar`) — combine any subset in one card
 - **Battery section** (inherited from UBC): SOC ring + Power ring, reserve/cutoff markers, time-to-full/empty estimates, stats panel for temp/cycles/health, 5-step SOC color thresholds
 - **Consumption section**: 3-segment donut (Grid / PV-direct / Battery-discharge) with the total wattage in the center; legend with current power + today's energy per source
@@ -116,6 +117,18 @@ pv_panels:
     peak: 400
     energy_today_entity: sensor.pv_string_4_today
 ```
+
+## Language
+
+The card auto-detects the active Home Assistant UI language and uses it for all labels (gauge captions, state words like *Charging / Laden / Charge / Cargando*, legend entries, etc.). Supported: **English, Deutsch, Français, Español**.
+
+To override:
+
+```yaml
+language: de   # or: en | fr | es | auto (default)
+```
+
+The visual editor itself stays in English.
 
 ## Section Toggles
 
