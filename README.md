@@ -2,6 +2,8 @@
 
 A Home Assistant Lovelace card with **battery**, **consumption**, and **solar** gauges — each section optional, all sensors freely configurable.
 
+![Energy Gauge Card screenshot](screenshot.png)
+
 Forked from [Universal Battery Card](https://github.com/laurence-syree/universal-battery-card) (MIT) by Laurence Syree, itself based on [givtcp-battery-card](https://github.com/Codegnosis/givtcp-battery-card) by Codegnosis.
 
 ## Features
