@@ -1,5 +1,7 @@
 # Energy Gauge Card
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=GB-1972&repository=HA-Energy-Gauge-Card&category=plugin)
+
 A Home Assistant Lovelace card with **battery**, **consumption**, and **solar** gauges — each section optional, all sensors freely configurable.
 
 ![Energy Gauge Card screenshot](screenshot.png)
